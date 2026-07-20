@@ -1,0 +1,31 @@
+.weather-card {
+  background-color: var(--color-sidebar);
+  border-radius: var(--border-radius-sm);
+  padding: 1.5rem;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.weather-card h2 {
+  color: var(--color-text);
+  font-family: var(--font-family);
+}
+
+.weather-card .temperature {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.search-button {
+  background-color: var(--color-accent);
+  color: var(--color-text);
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: var(--color-accent-light);
+}
