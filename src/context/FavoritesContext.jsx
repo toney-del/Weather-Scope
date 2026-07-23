@@ -26,8 +26,16 @@ export function FavoritesProvider({ children }) {
     setFavorites((prev) => prev.filter((fav) => fav !== city));
   };
 
+  // 👇 UPDATE FUNCTION
+  const updateFavorite = (oldCity, newCity) => {
+    setFavorites((prev) => 
+      prev.map((city) => (city === oldCity ? newCity : city))
+    );
+  };
+
   return (
-    <FavoritesContext.Provider value={{ favorites, addFavorite, removeFavorite }}>
+    // 👇 FIX: Added updateFavorite to the value object!
+    <FavoritesContext.Provider value={{ favorites, addFavorite, removeFavorite, updateFavorite }}>
       {children}
     </FavoritesContext.Provider>
   );

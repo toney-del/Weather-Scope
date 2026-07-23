@@ -1,18 +1,49 @@
+import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { useFavorites } from '../context/FavoritesContext';
-import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 
 function Favorites() {
-  const { favorites, removeFavorite } = useFavorites();
+  const { favorites, addFavorite, removeFavorite, updateFavorite } = useFavorites();
   const { theme } = useContext(ThemeContext);
+  
+  // State for the "Create" form
+  const [newCity, setNewCity] = useState('');
+  
+  // State for the "Update" form
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState('');
 
-  if (favorites.length === 0) {
+  // CREATE: Add new item through a form
+  const handleCreate = (e) => {
+    e.preventDefault();
+    if (newCity.trim()) {
+      addFavorite(newCity.trim());
+      setNewCity('');
+    }
+  };
+
+  // UPDATE: Start editing
+  const startEdit = (city) => {
+    setEditingId(city);
+    setEditValue(city);
+  };
+
+  // UPDATE: Save edit
+  const saveEdit = (oldCity) => {
+    if (editValue.trim() && editValue !== oldCity) {
+      updateFavorite(oldCity, editValue.trim());
+    }
+    setEditingId(null);
+    setEditValue('');
+  };
+
+  if (favorites.length === 0 && !newCity) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-        <h1>❤️ Your Favorites</h1>
-        <p style={{ color: theme === 'dark' ? '#aaa' : '#666' }}>
-          You haven't saved any cities yet. Search for a city and click the heart icon to save it!
+        <h1>❤️ Your Favorite Cities</h1>
+        <p style={{ color: 'var(--color-text)', marginBottom: '1.5rem' }}>
+          You haven't saved any cities yet. Use the form below to add one!
         </p>
       </div>
     );
@@ -20,57 +51,78 @@ function Favorites() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>❤️ Your Favorites</h1>
-      <p style={{ color: theme === 'dark' ? '#aaa' : '#666', marginBottom: '1.5rem' }}>
-        You have {favorites.length} saved {favorites.length === 1 ? 'city' : 'cities'}.
-      </p>
+      <h1 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>❤️ Your Favorite Cities</h1>
       
+      {/* CREATE: Form to add new items */}
+      <form onSubmit={handleCreate} className="card" style={{ marginBottom: '2rem', display: 'flex', gap: '10px' }}>
+        <input
+          type="text"
+          value={newCity}
+          onChange={(e) => setNewCity(e.target.value)}
+          placeholder="Add a new city (e.g., Paris)"
+          className="search-input"
+          style={{ marginBottom: 0, flex: 1 }}
+        />
+        <button type="submit" className="btn">Add City</button>
+      </form>
+
+      {/* READ & UPDATE & DELETE: List of items */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {favorites.map((city) => (
-          // Course note reminder: Always use a unique key in .map()!
           <div 
             key={city} 
+            className="card"
             style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
               alignItems: 'center',
-              padding: '1rem', 
-              backgroundColor: theme === 'dark' ? '#1e1e1e' : '#f8f9fa', 
-              borderRadius: '8px',
-              border: `1px solid ${theme === 'dark' ? '#333' : '#e9ecef'}`
+              padding: '1rem'
             }}
           >
-            <span style={{ fontWeight: 'bold', color: theme === 'dark' ? '#e0e0e0' : '#333' }}>
-              {city}
-            </span>
+            {/* UPDATE: Show input if editing, otherwise show text */}
+            {editingId === city ? (
+              <input
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                className="search-input"
+                style={{ marginBottom: 0, flex: 1, marginRight: '10px' }}
+                autoFocus
+              />
+            ) : (
+              <span style={{ fontWeight: '600', color: 'var(--color-text-h)', flex: 1 }}>
+                {city}
+              </span>
+            )}
+
             <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {/* UPDATE: Save or Edit button */}
+              {editingId === city ? (
+                <button onClick={() => saveEdit(city)} className="btn" style={{ padding: '8px 12px', fontSize: '14px' }}>
+                  Save
+                </button>
+              ) : (
+                <button onClick={() => startEdit(city)} className="btn" style={{ padding: '8px 12px', fontSize: '14px', backgroundColor: '#f59e0b' }}>
+                  Edit
+                </button>
+              )}
+
+              {/* DELETE: Remove button */}
+              <button 
+                onClick={() => removeFavorite(city)}
+                className="btn" 
+                style={{ padding: '8px 12px', fontSize: '14px', backgroundColor: '#ef4444' }}
+              >
+                Delete
+              </button>
+
               <Link 
                 to={`/weather/${city.replace(/\s+/g, '-')}`}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#E91E8C',
-                  color: 'white',
-                  textDecoration: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.9rem'
-                }}
+                className="btn" 
+                style={{ padding: '8px 12px', fontSize: '14px' }}
               >
                 View
               </Link>
-              <button 
-                onClick={() => removeFavorite(city)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#ff4d4f',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem'
-                }}
-              >
-                Remove
-              </button>
             </div>
           </div>
         ))}
